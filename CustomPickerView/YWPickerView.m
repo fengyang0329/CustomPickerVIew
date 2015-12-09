@@ -14,16 +14,18 @@
 
 #define kCancelTitleColor [UIColor colorWithRed:0/255.0 green:149/255.0 blue:226/255.0 alpha:1.0]
 #define kDoneTitleColor  [UIColor colorWithRed:0/255.0 green:149/255.0 blue:226/255.0 alpha:1.0]
-#define kSelectedTextColor [UIColor colorWithRed:72/255.0 green:72/255.0 blue:72/255.0 alpha:1.0]
+#define kLineColor [UIColor colorWithRed:237/255.0 green:237/255.0 blue:237/255.0 alpha:1.0]
 
 @interface YWPickerView ()<UIPickerViewDataSource,UIPickerViewDelegate>
 
 @property(nonatomic,strong)UIPickerView *pickerView;
 @property(nonatomic,strong)NSMutableArray *dataArray;
 @property(nonatomic,strong)NSMutableArray *compontArray;
+@property(nonatomic,strong)NSMutableArray *originCompontArray;
 @property(nonatomic,assign)float totalHeight;
 @property(nonatomic,assign)NSInteger maxRow;
 @property(nonatomic,strong)NSString *resultStr;
+@property(nonatomic,strong)NSMutableArray *constraints;
 
 @end
 
@@ -33,19 +35,21 @@
 {
     if (self == [super init])
     {
+        _constraints = [NSMutableArray array];
         _dataArray = [NSMutableArray array];
         _compontArray = [NSMutableArray array];
+        _originCompontArray = [NSMutableArray array];
+        
         _maxRow = maxRow;
-        _maxRow = _maxRow > 7?6:_maxRow;
+        _maxRow = _maxRow > 7?7:_maxRow;
         _totalHeight = _maxRow*kRowHeight+kToolBarHeight;
         
-        [self setBackgroundColor:[UIColor clearColor]];
+        [self setBackgroundColor:[UIColor whiteColor]];
         self.clipsToBounds = YES;
         self.translatesAutoresizingMaskIntoConstraints = NO;
         [[UIApplication sharedApplication].keyWindow addSubview:self];
         [[UIApplication sharedApplication].keyWindow addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[self]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(self)]];
         [[UIApplication sharedApplication].keyWindow addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[self(height)]|" options:0 metrics:@{@"height":@(_totalHeight)} views:NSDictionaryOfVariableBindings(self)]];
-        self.transform = CGAffineTransformMakeTranslation(0, _totalHeight);
         
         _toolBar = [self setToolBar];
         _toolBar.translatesAutoresizingMaskIntoConstraints = NO;
@@ -63,7 +67,7 @@
         
         [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_toolBar]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_toolBar)]];
         [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_pickerView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_pickerView)]];
-        [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[_toolBar(height)][_pickerView]|" options:0 metrics:@{@"height":@(kToolBarHeight)} views:NSDictionaryOfVariableBindings(_toolBar,_pickerView)]];
+        [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[_toolBar(height)][_pickerView(height2)]|" options:0 metrics:@{@"height":@(kToolBarHeight),@"height2":@(_totalHeight-kToolBarHeight)} views:NSDictionaryOfVariableBindings(_toolBar,_pickerView)]];
         
         va_list args;
         va_start(args, datas);
@@ -71,8 +75,10 @@
         {
             [_dataArray addObject:tmpArr];
             [_compontArray addObject:@(0)];
+            [_originCompontArray addObject:@(0)];
         }
         [_pickerView reloadAllComponents];
+        [self dismissWithTime:0];
     }
     return self;
 }
@@ -103,24 +109,39 @@
     return toolbar;
 }
 
-
 - (void)show
 {
+
     [UIView animateWithDuration:0.3 animations:^{
    
         self.transform = CGAffineTransformIdentity;
     } completion:nil];
 }
+
 - (void)dismiss
 {
-    [UIView animateWithDuration:0.3 animations:^{
+    for (int i=0; i<_originCompontArray.count; i++)
+    {
+        NSInteger compont = i;
+        NSInteger row = [_originCompontArray[i] integerValue];
+        [self.pickerView selectRow:row inComponent:compont animated:NO];
+    }
+    [self dismissWithTime:0.3];
+}
+
+- (void)dismissWithTime:(NSTimeInterval)time
+{
+    [UIView animateWithDuration:time animations:^{
         
-        self.transform = CGAffineTransformMakeTranslation(0, _totalHeight);
+        CGAffineTransform transform = CGAffineTransformIdentity;
+        transform = CGAffineTransformTranslate(transform, 0, _totalHeight);
+        self.layer.affineTransform = transform;
     } completion:nil];
 }
 
 - (void)done
 {
+    _originCompontArray = [NSMutableArray arrayWithArray:_compontArray];
     [self dismiss];
     if (self.delegate && [self.delegate respondsToSelector:@selector(pickerView:selectedRowArray:WithResult:)])
     {
@@ -135,12 +156,13 @@
         tmpData = _dataArray[component];
         if (tmpData.count > row)
         {
+            [_originCompontArray replaceObjectAtIndex:component withObject:@(row)];
             [self.pickerView selectRow:row inComponent:component animated:animated];
             [self pickerView:_pickerView didSelectRow:row inComponent:component];
         }
     }
-    
 }
+
 
 #pragma mark UIPickerViewDataSource & UIPickerViewDelegate
 -(NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
@@ -187,6 +209,7 @@
     {
         text = tmpData[row];
     }
+    
     UILabel *textLabel = [[UILabel alloc]init];
     textLabel.textAlignment = NSTextAlignmentCenter;
     textLabel.font = [UIFont systemFontOfSize:20];
@@ -232,9 +255,7 @@
             text = [text stringByAppendingFormat:@"%@%@",tmpStr,i==_compontArray.count-1?@"":@","];
         }
     }
-    _resultStr = text;
-//    NSLog(@"resultString:%@",text);
-    
+    _resultStr = text;    
 }
 
 @end

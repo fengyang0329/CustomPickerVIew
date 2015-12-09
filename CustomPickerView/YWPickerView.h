@@ -21,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  *
- *  @param maxRow 一列最大显示行数,(因系统控件原因，最大只能显示7行)
+ *  @param maxRow 一列最大显示行数,(因系统控件原因，最小选择5行,最大只能显示7行)
  *  @param datas  每列的数据
  *
  */
