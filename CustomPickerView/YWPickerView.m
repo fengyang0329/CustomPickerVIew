@@ -18,32 +18,34 @@
 
 @interface YWPickerView ()<UIPickerViewDataSource,UIPickerViewDelegate>
 
-@property(nonatomic,strong)UIPickerView *pickerView;
-@property(nonatomic,strong)NSMutableArray *dataArray;
-@property(nonatomic,strong)NSMutableArray *compontArray;
-@property(nonatomic,strong)NSMutableArray *originCompontArray;
+@property(nonatomic,strong)NSMutableArray *tmpSelectRows;
 @property(nonatomic,assign)float totalHeight;
 @property(nonatomic,assign)NSInteger maxRow;
-@property(nonatomic,strong)NSString *resultStr;
-@property(nonatomic,strong)NSMutableArray *constraints;
 
 @end
 
 @implementation YWPickerView
 
+- (instancetype)init
+{
+    if (self==[super init]) {
+        
+    }
+    return self;
+}
 - (instancetype)initWithMaxDisplayRow:(NSInteger)maxRow WithDataArray:(nullable NSArray *)datas,...
 {
     if (self == [super init])
     {
-        _constraints = [NSMutableArray array];
         _dataArray = [NSMutableArray array];
-        _compontArray = [NSMutableArray array];
-        _originCompontArray = [NSMutableArray array];
+        _selectRows = [NSMutableArray array];
+        _tmpSelectRows = [NSMutableArray array];
         
         _maxRow = maxRow;
         _maxRow = _maxRow > 7?7:_maxRow;
         _totalHeight = _maxRow*kRowHeight+kToolBarHeight;
         
+        [UIApplication sharedApplication].keyWindow.clipsToBounds = YES;
         [self setBackgroundColor:[UIColor whiteColor]];
         self.clipsToBounds = YES;
         self.translatesAutoresizingMaskIntoConstraints = NO;
@@ -63,8 +65,6 @@
         _pickerView.translatesAutoresizingMaskIntoConstraints = NO;
         [self addSubview:_pickerView];
 
-        
-        
         [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_toolBar]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_toolBar)]];
         [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_pickerView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_pickerView)]];
         [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[_toolBar(height)][_pickerView(height2)]|" options:0 metrics:@{@"height":@(kToolBarHeight),@"height2":@(_totalHeight-kToolBarHeight)} views:NSDictionaryOfVariableBindings(_toolBar,_pickerView)]];
@@ -74,8 +74,8 @@
         for (NSArray *tmpArr = datas; tmpArr != nil; tmpArr = va_arg(args,NSArray*))
         {
             [_dataArray addObject:tmpArr];
-            [_compontArray addObject:@(0)];
-            [_originCompontArray addObject:@(0)];
+            [_selectRows addObject:@(0)];
+            [_tmpSelectRows addObject:@(0)];
         }
         [_pickerView reloadAllComponents];
         [self dismissWithTime:0];
@@ -111,19 +111,18 @@
 
 - (void)show
 {
-
     [UIView animateWithDuration:0.3 animations:^{
-   
+        
         self.transform = CGAffineTransformIdentity;
-    } completion:nil];
-}
+        
+    } completion:nil];}
 
 - (void)dismiss
 {
-    for (int i=0; i<_originCompontArray.count; i++)
+    for (int i=0; i<_tmpSelectRows.count; i++)
     {
         NSInteger compont = i;
-        NSInteger row = [_originCompontArray[i] integerValue];
+        NSInteger row = [_tmpSelectRows[i] integerValue];
         [self.pickerView selectRow:row inComponent:compont animated:NO];
     }
     [self dismissWithTime:0.3];
@@ -132,39 +131,52 @@
 - (void)dismissWithTime:(NSTimeInterval)time
 {
     [UIView animateWithDuration:time animations:^{
-        
+    
         CGAffineTransform transform = CGAffineTransformIdentity;
         transform = CGAffineTransformTranslate(transform, 0, _totalHeight);
         self.layer.affineTransform = transform;
-    } completion:nil];
+    } completion:^(BOOL finished){
+        if (time>0 && self.delegate && [self.delegate respondsToSelector:@selector(dismissSuccessCallBack)]) {
+            [self.delegate dismissSuccessCallBack];
+        }
+    }];
 }
 
 - (void)done
 {
-    _originCompontArray = [NSMutableArray arrayWithArray:_compontArray];
+    _tmpSelectRows = [NSMutableArray arrayWithArray:_selectRows];
     [self dismiss];
-    if (self.delegate && [self.delegate respondsToSelector:@selector(pickerView:selectedRowArray:WithResult:)])
-    {
-        [self.delegate pickerView:self selectedRowArray:_compontArray WithResult:_resultStr];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(doneSuccessWithSelectRows:)]) {
+        [self.delegate doneSuccessWithSelectRows:_selectRows];
     }
 }
 
-- (void)selectYWPickerViewRow:(NSInteger)row inComponent:(NSInteger)component animated:(BOOL)animated
+- (void)selectRow:(NSInteger)row inComponent:(NSInteger)component animated:(BOOL)animated
 {
     NSArray *tmpData;
     if (_dataArray.count > component) {
         tmpData = _dataArray[component];
         if (tmpData.count > row)
         {
-            [_originCompontArray replaceObjectAtIndex:component withObject:@(row)];
-            [self.pickerView selectRow:row inComponent:component animated:animated];
+            [_tmpSelectRows replaceObjectAtIndex:component withObject:@(row)];
+            [_pickerView selectRow:row inComponent:component animated:animated];
             [self pickerView:_pickerView didSelectRow:row inComponent:component];
         }
     }
 }
+- (void)reloadAllComponents
+{
+    [_pickerView reloadAllComponents];
+}
+- (void)reloadComponent:(NSInteger)component
+{
+    [_pickerView reloadComponent:component];
+}
 
 
-#pragma mark UIPickerViewDataSource & UIPickerViewDelegate
+
+
+#pragma mark UIPickerViewDataSource 
 -(NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
 {
     return _dataArray.count;
@@ -179,6 +191,10 @@
     return tmpData.count;
 }
 
+
+
+
+#pragma mark UIPickerViewDelegate
 - (CGFloat)pickerView:(UIPickerView *)pickerView rowHeightForComponent:(NSInteger)component
 {
     return kRowHeight;
@@ -186,9 +202,9 @@
 
 - (CGFloat) pickerView:(UIPickerView *)pickerView widthForComponent:(NSInteger)component{
     
-    if (_compontArray.count > 0)
+    if (_selectRows.count > 0)
     {
-        float width = [UIScreen mainScreen].bounds.size.width/_compontArray.count;
+        float width = [UIScreen mainScreen].bounds.size.width/_selectRows.count;
         return width;
     }
     return 0;
@@ -239,23 +255,14 @@
 
 -(void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
 {
-    NSArray *tmpData;
-    NSString *text = @"";
-    if (_compontArray.count > component)
+    if (_selectRows.count > component)
     {
-        [_compontArray replaceObjectAtIndex:component withObject:@(row)];
+        [_selectRows replaceObjectAtIndex:component withObject:@(row)];
     }
-    for (int i=0; i< _compontArray.count; i++)
-    {
-        tmpData = _dataArray[i];
-        NSInteger selectRow = [_compontArray[i] integerValue];
-        if(tmpData.count > selectRow)
-        {
-            NSString *tmpStr = tmpData[selectRow];
-            text = [text stringByAppendingFormat:@"%@%@",tmpStr,i==_compontArray.count-1?@"":@","];
-        }
+    if (self.delegate && [self.delegate respondsToSelector:@selector(pickerView:didSelectRow:inComponent:)]) {
+        [self.delegate pickerView:self didSelectRow:row inComponent:component];
     }
-    _resultStr = text;    
+
 }
 
 @end

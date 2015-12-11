@@ -10,7 +10,6 @@
 #import "YWPickerView.h"
 
 @interface ViewController ()<YWPickerViewDelegate>
-
 @end
 
 @implementation ViewController
@@ -29,22 +28,30 @@
     [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-120-[btn(60)]" options:0 metrics:nil views:NSDictionaryOfVariableBindings(btn)]];
     
 }
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+   
+}
 
 - (void)show
 {
-    static YWPickerView *pickerView;
-    if (pickerView==nil)
+    static YWPickerView *_pickerView;
+    if (_pickerView==nil)
     {
-        pickerView = [[YWPickerView alloc] initWithMaxDisplayRow:10 WithDataArray:@[@"1",@"山东",@"3岁",@"4",@"5",@"6",@"7",@"山东",@"3岁",@"45",@"1",@"山东",@"3岁",@"4",@"5",@"6",@"7",@"山东",@"3岁",@"45"],@[@"1",@"山东",@"3岁",@"4",@"5",@"6",@"7",@"山东",@"3岁",@"45",@"1",@"山东",@"3岁",@"4",@"5",@"6",@"7",@"山东",@"3岁",@"45"],nil];
-        pickerView.delegate = self;
-        [pickerView selectYWPickerViewRow:3 inComponent:0 animated:NO];
+        _pickerView = [[YWPickerView alloc] initWithMaxDisplayRow:10 WithDataArray:@[@"1",@"山东",@"3岁",@"4",@"5",@"6",@"7",@"山东",@"3岁",@"45",@"1",@"山东",@"3岁",@"4",@"5",@"6",@"7",@"山东",@"3岁",@"45"],@[@"1",@"山东",@"3岁",@"4",@"5",@"6",@"7",@"山东",@"3岁",@"45",@"1",@"山东",@"3岁",@"4",@"5",@"6",@"7",@"山东",@"3岁",@"45"],nil];
+        _pickerView.delegate = self;
+        [_pickerView selectRow:3 inComponent:0 animated:NO];
     }
-    [pickerView show];
+   
+    [_pickerView show];
 }
 
-- (void)pickerView:(YWPickerView *)pickerView selectedRowArray:(NSArray *)rowArray WithResult:(NSString *)result
+
+#pragma mark YWPickerViewDelegate
+- (void)showSuccessCallBack
 {
-    NSLog(@"result:%@",result);
+    
 }
 
 - (void)didReceiveMemoryWarning {

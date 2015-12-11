@@ -13,7 +13,6 @@
 		D04D6CF81C0DC88B00D07CF0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D04D6CF71C0DC88B00D07CF0 /* Assets.xcassets */; };
 		D04D6D061C0DC88B00D07CF0 /* CustomPickerViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D04D6D051C0DC88B00D07CF0 /* CustomPickerViewTests.m */; };
 		D04D6D121C0DC93400D07CF0 /* YWPickerView.m in Sources */ = {isa = PBXBuildFile; fileRef = D04D6D111C0DC93400D07CF0 /* YWPickerView.m */; };
-		D04D6D141C0DCA7400D07CF0 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D04D6D131C0DCA7400D07CF0 /* Images.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,7 +39,6 @@
 		D04D6D071C0DC88B00D07CF0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D04D6D101C0DC93400D07CF0 /* YWPickerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YWPickerView.h; sourceTree = "<group>"; };
 		D04D6D111C0DC93400D07CF0 /* YWPickerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YWPickerView.m; sourceTree = "<group>"; };
-		D04D6D131C0DCA7400D07CF0 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,7 +88,6 @@
 				D04D6CF21C0DC88B00D07CF0 /* ViewController.m */,
 				D04D6CF71C0DC88B00D07CF0 /* Assets.xcassets */,
 				D04D6CFC1C0DC88B00D07CF0 /* Info.plist */,
-				D04D6D131C0DCA7400D07CF0 /* Images.xcassets */,
 				D04D6CEB1C0DC88B00D07CF0 /* Supporting Files */,
 			);
 			path = CustomPickerView;
@@ -195,7 +192,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D04D6CF81C0DC88B00D07CF0 /* Assets.xcassets in Resources */,
-				D04D6D141C0DCA7400D07CF0 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -390,6 +386,7 @@
 				D04D6D0C1C0DC88B00D07CF0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		D04D6D0D1C0DC88B00D07CF0 /* Build configuration list for PBXNativeTarget "CustomPickerViewTests" */ = {
 			isa = XCConfigurationList;
@@ -398,6 +395,7 @@
 				D04D6D0F1C0DC88B00D07CF0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

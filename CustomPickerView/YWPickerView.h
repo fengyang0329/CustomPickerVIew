@@ -14,9 +14,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface YWPickerView : UIView
 @property(nonatomic,weak)id <YWPickerViewDelegate>delegate;
+
+@property(nonatomic,strong)UIPickerView *pickerView;
 @property(nonatomic,strong)UIToolbar *toolBar;
 @property(nonatomic,strong)UIButton *cancelBtn;
 @property(nonatomic,strong)UIButton *doneBtn;
+
+/**
+ *  当前行所包含列的选中下标;传入所在列(component),可得到当前列的选中row
+ */
+@property(nonatomic,readonly,strong)NSMutableArray *selectRows;
+
+/**
+ *  所有列的数据源集合
+ */
+@property(nonatomic,readonly,strong)NSMutableArray *dataArray;
 
 
 /**
@@ -27,20 +39,29 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithMaxDisplayRow:(NSInteger)maxRow WithDataArray:(nullable NSArray *)datas,...;
 
-- (void)selectYWPickerViewRow:(NSInteger)row inComponent:(NSInteger)component animated:(BOOL)animated;
 - (void)show;
 - (void)dismiss;
+
+- (void)selectRow:(NSInteger)row inComponent:(NSInteger)component animated:(BOOL)animated;
+- (void)reloadAllComponents;
+- (void)reloadComponent:(NSInteger)component;
+
 @end
 
 
 @protocol YWPickerViewDelegate <NSObject>
 
+@optional
+
+
+-(void)pickerView:(YWPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component;
+
 /**
- *
- *  @param rowArray   返回列点击的下标
- *  @param result     以逗号拼接
+ *  动画完成之后的回调
+ *  @parmas selectRows 当前行所包含列的选中下标;传入所在列(component),可得到当前列的选中row
  */
-- (void)pickerView:(YWPickerView *)pickerView selectedRowArray:(NSArray *)rowArray WithResult:(NSString *)result;
+- (void)doneSuccessWithSelectRows:(NSArray *)selectRows;
+- (void)dismissSuccessCallBack;
 
 @end
 
