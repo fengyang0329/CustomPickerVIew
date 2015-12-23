@@ -71,7 +71,7 @@
         
         va_list args;
         va_start(args, datas);
-        for (NSArray *tmpArr = datas; tmpArr != nil; tmpArr = va_arg(args,NSArray*))
+        for (NSArray *tmpArr = datas; tmpArr.count > 0; tmpArr = va_arg(args,NSArray*))
         {
             [_dataArray addObject:tmpArr];
             [_selectRows addObject:@(0)];
@@ -146,7 +146,7 @@
 {
     _tmpSelectRows = [NSMutableArray arrayWithArray:_selectRows];
     [self dismiss];
-    if (self.delegate && [self.delegate respondsToSelector:@selector(doneSuccessWithSelectRows:)]) {
+    if (_selectRows.count > 0 && self.delegate && [self.delegate respondsToSelector:@selector(doneSuccessWithSelectRows:)]) {
         [self.delegate doneSuccessWithSelectRows:_selectRows];
     }
 }
